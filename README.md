@@ -58,7 +58,7 @@ Navigate via the command line into this **transkribus_xml2csv** directory.
 To **parse the pageXML** files and output a series of .csv files, call:
 
 ```bash
-python paragraph_extractor.py
+python ./src/paragraph_extractor.py 
 ```
 
 .csv files will be outputted to `./data/processed_csv`.
