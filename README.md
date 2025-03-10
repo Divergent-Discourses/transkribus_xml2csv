@@ -67,7 +67,7 @@ python ./src/paragraph_extractor.py
 To **merge .csv files** into a single .csv file, call:
 
 ```bash
-python merge_csv.py
+python ./src/merge_csv.py
 ```
 
 The master .csv file will be outputted to `./data/merged_csv`
