@@ -13,6 +13,7 @@ CSV columns include:
 
 * Paragraph (str): The text recognised by Transkribus HTR
 * Paragraph ID (str): E.g.	tr_1718110017
+* Reading order ID (int): A number representing the transkribus-predicted reading order index of the text region with its page.
 * Region type (str): E.g. caption, heading, paragraph, other
 * Filename (str): E.g. 0001_QTN_1959_10_03_001_SB_Zsn128163MR.jpg. The original image filename, extracted from the pageXML. Filenames must be underscore-separated with elements ordered as follows for the code to work as intended - 4-digit code assigned by Transkribus (0001), newspaper name/code (QTN), year (1959), month (10), date (03), page (001). Remaining information in filename is not extracted
 * Newspaper (str): E.g. QTN - parsed from the original image filename
@@ -58,7 +59,7 @@ Navigate via the command line into this **transkribus_xml2csv** directory.
 To **parse the pageXML** files and output a series of .csv files, call:
 
 ```bash
-python ./src/paragraph_extractor.py 
+python ./src/paragraph_extractor.py
 ```
 
 .csv files will be outputted to `./data/processed_csv`.
