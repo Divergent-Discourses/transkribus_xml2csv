@@ -56,7 +56,7 @@ class XMLParagraphExtractor:
         """
         file_metadata = self.parse_filename(fname)
 
-        with open(fname, 'r') as f:
+        with open(fname, 'r', encoding='utf-8') as f:
             data = f.read()
 
         root = ET.fromstring(data)
