@@ -32,7 +32,7 @@ class XMLParagraphExtractor:
         Parses metadata from the filename. Assumes metadata is stored in filename, formatted: 0001_QTN_1952_07_05_001_SB_Zsn128163MR.jpg
         (0001 = transkribus-assigned ID, QTN = newspaper name/code, 1952 = year, 07 = month, 05 = date, 001 = page, remaining info = irrelevant
         and shouldn't affect parsing). Elements should be underscore-separated. Order matters.
-        fstring (str): filepath
+        fstring (str): filepath or filename
         """
         filename = os.path.basename(fstring)  # Extract only the filename
 
@@ -54,8 +54,6 @@ class XMLParagraphExtractor:
         """
         Extracts text paragraphs from a PAGE XML file and returns a DataFrame.
         """
-        file_metadata = self.parse_filename(fname)
-
         with open(fname, 'r', encoding='utf-8') as f:
             data = f.read()
 
@@ -63,13 +61,19 @@ class XMLParagraphExtractor:
         content_keys = ['paragraph', 'paragraph_idx', 'readingorder_idx', 'region_type', 'filename', 'newspaper', 'year', 'month', 'date', 'page_num']
         contents = {k: [] for k in content_keys}
 
-
         # Extract the imageFilename attribute
         page_elem = root.find('.//ns:Page', self.namespaces)
 
         if page_elem is not None:
             image_filename = page_elem.get('imageFilename')
+        else:
+            image_filename = None
 
+        # Parse metadata from the IMAGE filename (not the XML filename)
+        if image_filename:
+            file_metadata = self.parse_filename(image_filename)
+        else:
+            raise ValueError(f"No imageFilename found in XML file: {fname}")
 
         for text_region in root.findall('.//ns:TextRegion', self.namespaces):
 
@@ -102,9 +106,12 @@ class XMLParagraphExtractor:
             contents['region_type'].append(region_type)
             contents['filename'].append(image_filename)
 
-            # Collect: newspaper, year, month, date, page_num
-            for k in file_metadata.keys():
-                contents[k].append(file_metadata[k])
+            # Collect metadata in the correct order: newspaper, year, month, date, page_num
+            contents['newspaper'].append(file_metadata['newspaper'])
+            contents['year'].append(file_metadata['year'])
+            contents['month'].append(file_metadata['month'])
+            contents['date'].append(file_metadata['date'])
+            contents['page_num'].append(file_metadata['page_num'])
 
         return pd.DataFrame(contents)
 
@@ -123,28 +130,17 @@ class XMLParagraphExtractor:
             print("No XML files found in to_process_xml/")
             return
 
-        for fname in xml_files:
-            try:
-                data = self.extract_xml(fname)
-
-                # Save CSV in the processed_csv directory
-                csv_filename = os.path.join(self.csv_dir, os.path.basename(fname).replace('.xml', '.csv'))
-                data.to_csv(csv_filename, index=False)
-
-                print(f'Processed and saved: {csv_filename}')
-
-            except Exception as e:
-                print(f'Error processing {fname}: {e}')
+        # Ensure output directory exists
+        if not os.path.exists(self.csv_dir):
+            os.makedirs(self.csv_dir)
 
         for fname in xml_files:
-
             try:
                 data = self.extract_xml(fname)
 
                 # Save CSV in the processed_csv directory
                 csv_filename = os.path.join(self.csv_dir, os.path.basename(fname).replace('.xml', '.csv'))
                 data.to_csv(csv_filename, index=False, encoding='utf-8-sig')
-
 
                 print(f'Processed and saved: {csv_filename}')
 
